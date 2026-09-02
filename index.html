@@ -1,0 +1,594 @@
+<title>SRA Office Finder</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,700&display=swap">
+
+<style>
+:root {
+  --bg: #F5F6F8;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F0F2F5;
+  --bg-search: #FFFFFF;
+  --bg-tag: #E8EBF0;
+  --bg-tag-highlight: #FFF3E0;
+  --bg-filter: #EDF0F4;
+  --bg-filter-active: #0F1A2E;
+  --text: #1A2332;
+  --text-secondary: #5A6577;
+  --text-tag: #3D4A5C;
+  --text-filter-active: #FFFFFF;
+  --accent: #D4883A;
+  --accent-soft: rgba(212,136,58,0.12);
+  --teal: #2E7D6F;
+  --teal-soft: rgba(46,125,111,0.10);
+  --border: #D8DDE6;
+  --border-card: #E2E6EC;
+  --shadow-card: 0 1px 3px rgba(15,26,46,0.06);
+  --shadow-search: 0 2px 12px rgba(15,26,46,0.08);
+  --radius: 8px;
+  --radius-sm: 5px;
+  --radius-tag: 4px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1220;
+    --bg-card: #152033;
+    --bg-card-hover: #1C2A42;
+    --bg-search: #152033;
+    --bg-tag: #1C2A42;
+    --bg-tag-highlight: #3D2A10;
+    --bg-filter: #1C2A42;
+    --bg-filter-active: #D4883A;
+    --text: #E2E6EC;
+    --text-secondary: #8B95A5;
+    --text-tag: #A0AAB8;
+    --text-filter-active: #0B1220;
+    --accent: #E8A35A;
+    --accent-soft: rgba(232,163,90,0.15);
+    --teal: #4DBBAA;
+    --teal-soft: rgba(77,187,170,0.12);
+    --border: #253048;
+    --border-card: #253048;
+    --shadow-card: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-search: 0 2px 12px rgba(0,0,0,0.3);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0B1220;
+  --bg-card: #152033;
+  --bg-card-hover: #1C2A42;
+  --bg-search: #152033;
+  --bg-tag: #1C2A42;
+  --bg-tag-highlight: #3D2A10;
+  --bg-filter: #1C2A42;
+  --bg-filter-active: #D4883A;
+  --text: #E2E6EC;
+  --text-secondary: #8B95A5;
+  --text-tag: #A0AAB8;
+  --text-filter-active: #0B1220;
+  --accent: #E8A35A;
+  --accent-soft: rgba(232,163,90,0.15);
+  --teal: #4DBBAA;
+  --teal-soft: rgba(77,187,170,0.12);
+  --border: #253048;
+  --border-card: #253048;
+  --shadow-card: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-search: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.header {
+  padding: 28px 24px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 700;
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.header .subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 20px;
+}
+
+.search-area {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--bg);
+  padding: 12px 24px 0;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.search-wrap {
+  position: relative;
+  margin-bottom: 12px;
+}
+
+.search-wrap svg {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  color: var(--text-secondary);
+}
+
+.search-input {
+  width: 100%;
+  padding: 12px 14px 12px 42px;
+  font-family: inherit;
+  font-size: 15px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-search);
+  color: var(--text);
+  box-shadow: var(--shadow-search);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.filter-btn {
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--bg-filter);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.filter-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.filter-btn.active {
+  background: var(--bg-filter-active);
+  color: var(--text-filter-active);
+  border-color: var(--bg-filter-active);
+}
+
+.results-info {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 12px 24px 8px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.results-info span {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 10px;
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-card);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  box-shadow: var(--shadow-card);
+  transition: background 0.15s, box-shadow 0.15s;
+  cursor: default;
+}
+
+.card:hover {
+  background: var(--bg-card-hover);
+}
+
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.card-name {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+.card-location {
+  font-size: 12px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.card-contact {
+  font-size: 13px;
+  color: var(--teal);
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.tag {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-tag);
+  background: var(--bg-tag);
+  color: var(--text-tag);
+  white-space: nowrap;
+}
+
+.tag.highlight {
+  background: var(--bg-tag-highlight);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.no-results {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-secondary);
+  font-size: 15px;
+}
+
+.no-results strong {
+  display: block;
+  font-size: 17px;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.kris-verticals {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+  margin-bottom: 0;
+}
+
+.kris-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-right: 4px;
+  align-self: center;
+}
+
+@media (max-width: 720px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  .header h1 {
+    font-size: 22px;
+  }
+}
+</style>
+
+<div class="header">
+  <h1>SRA Office Finder</h1>
+  <p class="subtitle">160 offices across the Sanford Rose Associates network, categorized by specialty. Search by industry, role type, or keyword.</p>
+</div>
+
+<div class="search-area">
+  <div class="search-wrap">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
+    <input class="search-input" type="text" id="searchInput" placeholder="Try: FinTech, cybersecurity, medical device, construction, AI...">
+  </div>
+  <div class="filters" id="filters"></div>
+</div>
+
+<div class="results-info" id="resultsInfo"></div>
+<div class="grid" id="grid"></div>
+
+<script>
+const OFFICES = [
+  {name:"11th Hour Service",location:"Falls Church, VA",contact:"Alin Popescu",tags:["Communications","Consumer Services","DoD","Energy","Federal Sector","Healthcare","Manufacturing","Technology"]},
+  {name:"3D CRO",location:"Fair Lawn, NJ",contact:"Paul Pellegrino",tags:["Life Science"]},
+  {name:"3D Tek Legal & Tech Recruiting",location:"Bushnell, FL",contact:"Emil Owen",tags:["Attorney","Executive Search","Information Technology","Legal"]},
+  {name:"4D Executive Search",location:"Encino, CA",contact:"Robin Levitt",tags:["Human Resources"]},
+  {name:"Actus Search Group",location:"Hayden, ID",contact:"Vince Brown",tags:["Actuarial"]},
+  {name:"Agri-Search",location:"Arthur, IL",contact:"Chelbi Alt, Brad Jansen",tags:["Agricultural","Agronomy","Grain & Feed","Storage & Processing"]},
+  {name:"Arizona Construction Recruiter",location:"Gilbert, AZ",contact:"Matthew Mancino",tags:["Construction"]},
+  {name:"Aspen Associates Group",location:"Littleton, CO",contact:"Tom Zeleny",tags:["Healthcare","Long Term Care","Senior Living","Skilled Nursing"]},
+  {name:"Aspen Careers",location:"Columbus, OH",contact:"Teresa Shuler",tags:["Legal"]},
+  {name:"Autopeople",location:"El Dorado Hills, CA",contact:"David Adragna",tags:["Automotive"]},
+  {name:"Berkeley Search Consultants",location:"Walnut Creek, CA",contact:"Mark Howard",tags:["Banking","Consumer Packaged Goods","Financial Services","Healthcare","Public Sector","Technology"]},
+  {name:"Beyond Search Inc.",location:"Long Beach, CA",contact:"Kevin Martin",tags:["Information Technology","Sales"]},
+  {name:"Blue Ocean Hire",location:"Tequesta, FL",contact:"Eric Fielder",tags:["Consulting","Healthcare","Life Science","Technology"]},
+  {name:"Blue Recruit",location:"Cleveland, OH",contact:"David Rieth",tags:["Aerospace"]},
+  {name:"Blue Rock Human Capital",location:"Staunton, VA",contact:"Ruben Moreno",tags:["Customer Service","Franchising","Human Resources"]},
+  {name:"Boaz Partners",location:"Atlanta, GA",contact:"Weslee Washington",tags:["Chemicals","Industrial Manufacturing","Plastics"]},
+  {name:"Boston South Shore",location:"Cohasset, MA",contact:"Kevin Norgeot",tags:["Clinical","Communications","Investor Relations","Manufacturing","Marketing","Medical","Physicians"]},
+  {name:"Brandon Becker",location:"Eastport, NY",contact:"Bob Levitt",tags:["Sales"]},
+  {name:"Brett Fisher Group",location:"Thousand Oaks, CA",contact:"Brett Fisher",tags:["Medical Device","Medical Technologies"]},
+  {name:"BRIX Recruiting Partners",location:"Chaska, MN",contact:"Andy Wright",tags:["Building Products","Construction","Home Improvement","Industrial","Manufacturing","Roofing"]},
+  {name:"BroadReach Search Partners",location:"Denver, CO",contact:"Bob Broady",tags:["Biotechnology","Diagnostics","Life Science"]},
+  {name:"BrokerHunter",location:"Cumming, GA",contact:"David Testerman, Jeff Testerman",tags:["Finance","Financial Services"]},
+  {name:"Building Gurus",location:"Fargo, ND",contact:"Rikka Brandon",tags:["Building Product Manufacturers"]},
+  {name:"Bulldog Recruiters",location:"Orlando, FL",contact:"Cindy Szajkovics",tags:["Construction","Engineering"]},
+  {name:"Burks Search",location:"Cary, IL",contact:"Steve Burks",tags:["Chemicals","Food & Beverage","Food Processing","Legal"]},
+  {name:"Burnett Group",location:"Kendall Park, NJ",contact:"Ken Burnett",tags:["Architectural & Design","Building Materials","HVAC/R","Plumbing"]},
+  {name:"Capstone Search Advisors",location:"Independence, OH",contact:"Tony Nicol",tags:["Engineering","Finance","Industrial","Manufacturing","Supply Chain"]},
+  {name:"Carter Group",location:"Gainesville, GA",contact:"Rich Carter",tags:["Management Consulting","Training & Coaching"]},
+  {name:"Centermark Placements",location:"Meridian, ID",contact:"David Haasch",tags:["Architecture","Construction","Engineering","Healthcare"]},
+  {name:"Cerca Talent+",location:"Oradell, NJ",contact:"Scott Rivers",tags:["Biotechnology","Diagnostics","Life Science"]},
+  {name:"Chase & Associates",location:"Austin, TX",contact:"Michael Chase",tags:["Packaging"]},
+  {name:"ConnectPoint Search Group",location:"Sacramento, CA",contact:"Traci Cetraro",tags:["Accounting & Finance","Administrative","Human Resources","Information Technology"]},
+  {name:"Consiglio-Mattei Executive Search",location:"Albuquerque, NM",contact:"Adam Consiglio",tags:["Commercial Banking","Mortgage Banking","Retail Banking"]},
+  {name:"Continental Search",location:"Ocean View, DE",contact:"Daniel Simmons",tags:["Animal Sciences"]},
+  {name:"Critical Fit Recruiting",location:"Crystal Lake, IL",contact:"Brian Pahl",tags:["Electronics"]},
+  {name:"Dan Toussant & Associates",location:"Canton, OH",contact:"Dan Toussant",tags:["Accounting & Finance","CPA Firms","Transaction Advisory"]},
+  {name:"Delta Diversified",location:"Solon, OH",contact:"Benjamin Stocum",tags:["Building Technologies","Flexible Packaging","Industrial Automation","Packaging & Printing","Paper"]},
+  {name:"Disrupt X Talent",location:"Lake Oswego, OR",contact:"Matt Nixt",tags:["Engineering","Manufacturing"]},
+  {name:"DNA Diversity Executive Search",location:"Ottawa, ON",contact:"Ruth Dorsainville",tags:["Diversity","Executives"]},
+  {name:"Doyen Search Group",location:"Happy Valley, OR",contact:"Darrell Maxwell",tags:["Hospitality","Real Estate"]},
+  {name:"Employment Resource Group",location:"Appleton, WI",contact:"Sharon Hulce",tags:["Banking","Construction","Financial Services","Leadership","Manufacturing","Nonprofit"]},
+  {name:"Envision Search Partners",location:"Powell, OH",contact:"Julie Fox",tags:["Multifamily"]},
+  {name:"Epic Search Partners",location:"Kennebunk, ME",contact:"Peter Rouillard",tags:["Digital Marketing","Legal"]},
+  {name:"Essential Search",location:"Cedar Rapids, IA",contact:"Greg Ivory",tags:["Construction","Project Management","Superintendents","Estimators"]},
+  {name:"Estrem & Company",location:"Naples, FL",contact:"Colin Estrem",tags:["Construction"]},
+  {name:"Executive Search Associates",location:"Colorado Springs, CO",contact:"Eric Falt",tags:["Healthcare Finance","Healthcare Economics","Hospitals","Medical Device"]},
+  {name:"Expanded Talent Solutions",location:"Roswell, GA",contact:"Rebecca Thorton",tags:["Neuromodulation","Vascular"]},
+  {name:"Expertech Personnel Services",location:"Boston, MA",contact:"Themis Chrisanthopoulos",tags:["Information Technology"]},
+  {name:"Fairhope",location:"Kissimmee, FL",contact:"Paul Marquez",tags:["Executive Search","Marketing","Packaging","Printing","Sales"]},
+  {name:"Financial Recruiters International",location:"St. Louis, MO",contact:"Kevin Sailor",tags:["Banking","Family Office","Trust","Wealth Management"]},
+  {name:"Foxwood Tax Search",location:"London, ON",contact:"Eytan Ishai",tags:["Tax"]},
+  {name:"Full Spectrum Search Group",location:"Coppell, TX",contact:"Max McNamara, Gaston Wilder",tags:["Home Health","Hospice","Senior Living","Skilled Nursing"]},
+  {name:"Garman Partners",location:"Urbandale, IA",contact:"Steve Garman",tags:["Talent Optimization"]},
+  {name:"Genesis Search Group",location:"Philadelphia, PA",contact:"Jon Littman",tags:["Engineering","Manufacturing","Marketing","Operations","Product Development","Sales","Supply Chain"]},
+  {name:"Global Executive Solutions Group",location:"Fairlawn, OH",contact:"Scott Chadbourne",tags:["Beverage","Consulting","Crane & Rigging","Food","Logistics","Private Equity","Supply Chain","Transportation","Venture Capital"]},
+  {name:"Global Talent Resources",location:"Uniontown, OH",contact:"Glenn Richards",tags:["Automated Processing","Mergers & Acquisitions","Packaging","Private Wealth"]},
+  {name:"GTR",location:"Carmel, IN",contact:"Michael Ellis",tags:["Energy","Energy Storage","Engineering"]},
+  {name:"Hazeltine Executive Search Partners",location:"Houston, TX",contact:"Chad Spencer",tags:["Oil & Gas","Environmental","Industrial","Logistics","Oil Field Services","Power"]},
+  {name:"Healthcare Executive Search",location:"Southern Pines, NC",contact:"Pamela Baird Atwood",tags:["Healthcare"]},
+  {name:"Healthcare Recruitment Partners",location:"Franklin, TN",contact:"Michelle Boeckmann",tags:["Case Management","Healthcare"]},
+  {name:"Healthcare Talent Advisors",location:"Arvada, CO",contact:"Greg Hyman",tags:["Healthcare"]},
+  {name:"HireFinance Group",location:"Chicago, IL",contact:"Mike Assaad",tags:["Finance"]},
+  {name:"HireStrong",location:"Houston, TX",contact:"Josh May",tags:["Accounting & Finance","Energy","Engineering","Information Technology","Manufacturing","Supply Chain","Technical Sales"]},
+  {name:"Horizon Hospitality",location:"Overland Park, KS",contact:"Scott Samuels",tags:["Casinos","Catering","Contract Foodservice","Country Clubs","Entertainment Venues","Hospitality","Hotels","Property Management","Resorts","Restaurants","Senior Living"]},
+  {name:"HPS Talent",location:"Sarasota, FL",contact:"Henry Winters",tags:["Anesthesiology","Cardiology","Healthcare Specialists"]},
+  {name:"Huntsville Technical Services",location:"Dallas, PA",contact:"Mark Whitesell",tags:["Accounting & Finance","Architecture","Construction","Engineering"]},
+  {name:"Integrated Management Resources",location:"Scottsdale, AZ",contact:"Chad Dean",tags:["Economics","Financial Services","Quantitative Analysis","Risk Management","Trading Strategy"]},
+  {name:"Integrity Resource Management",location:"Carmel, IN",contact:"Keith Sims",tags:["Enterprise Applications","Information Technology","Pega BPM","Robotic Process Automation","SAP"]},
+  {name:"J Powers Recruiting",location:"Sacramento, CA",contact:"Jennifer Powers",tags:["Construction","Engineering","Maintenance","Operations","Regulatory Affairs"]},
+  {name:"Jamison Search International",location:"Orem, UT",contact:"Mike Jamison",tags:["Banking","Financial Services","Food & Beverage"]},
+  {name:"JFS Partners",location:"Orlando, FL",contact:"Joseph Sos",tags:["Accounting & Finance","Public Accounting"]},
+  {name:"JK Executive Strategies",location:"Rochester, NY",contact:"Jill Knittel",tags:["Financial","Healthcare","Higher Education","Legal","Manufacturing","Nonprofit","Professional Services"]},
+  {name:"Kaizen HR Solutions",location:"Elmhurst, IL",contact:"Rose Dorta",tags:["Chemicals","Consumer Packaged Goods","Plastics"]},
+  {name:"Kapp Search Group",location:"Telford, PA",contact:"Ryan Kapp",tags:["Automotive"]},
+  {name:"Kempf Group",location:"Adkins, TX",contact:"Randy Kempf",tags:["Aerospace","CNC Machining","Powder Metallurgy","Sheet Metal Fabrication","Space","Welding"]},
+  {name:"Kendall & Davis",location:"Fort Wayne, IN",contact:"Eric Heineman",tags:["Architecture","Cyber Security","Information Technology","Software Development"]},
+  {name:"Kenefick & Associates",location:"Bath, NC",contact:"Patrick Kenefick",tags:["Aerospace","DoD","Electronics","Engineering","Logistics","Manufacturing","Supply Chain"]},
+  {name:"Key Leadership Solutions",location:"Brighton, MI",contact:"Courtney Grant Tobbe",tags:["Executive Search","Human Resources","Manufacturing"]},
+  {name:"Kierstead Search Group",location:"Miamisburg, OH",contact:"Bryan Kierstead",tags:["Accounting","Construction","Engineering","Finance","Manufacturing"]},
+  {name:"KIP Search",location:"Edina, MN",contact:"Kip Knippel",tags:["Artificial Intelligence","Banking","Blockchain","C-Suite","Executive Search","Family Office","Financial Services","Hedge Funds","Investment Management","Legal","Manufacturing","Medical Device","Medical Technology","Private Equity","SaaS","Technology","Venture Capital","Web3"]},
+  {name:"Lake Lanier Islands",location:"Peachtree Corners, GA",contact:"Lisa Proctor",tags:["Accounting & Finance","Banking","Business Services","Diversity","Executive Search","Financial Services","Healthcare Support","Human Resources","Insurance"]},
+  {name:"Laney Solutions",location:"Arvada, CO",contact:"Kathleen Laney",tags:["Parking"]},
+  {name:"Leah Yosef International",location:"East Brunswick, NJ",contact:"Yosef Colish",tags:["C-Suite","Financial Services","Investment Management","Portfolio Managers","Private Wealth","Wealth Management"]},
+  {name:"LifeWork Search",location:"Westport, MA",contact:"Jason Breault",tags:["Supply Chain"]},
+  {name:"Markent",location:"Madison, WI",contact:"Mark Udulutch",tags:["Engineering","Manufacturing Management"]},
+  {name:"MB Attorney Search",location:"Mequon, WI",contact:"Michelle Bigler",tags:["Legal"]},
+  {name:"McFarlin Stanford",location:"Dallas, TX",contact:"James Cali",tags:["Landscape"]},
+  {name:"MilSpec Talent",location:"Fayetteville, NC",contact:"Freddie Kim",tags:["Veteran"]},
+  {name:"Misura Group",location:"Hudson, WI",contact:"Tony Misura",tags:["Building Materials"]},
+  {name:"Monson Group",location:"Hoover, AL",contact:"Steven Monson",tags:["Logistics","Transportation"]},
+  {name:"Moxee Agency",location:"Perrysburg, OH",contact:"Michael Mathews",tags:["Defense","Manufacturing Technology","Robotics"]},
+  {name:"Newport Williams Strategies",location:"Victoria, BC",contact:"Mason Stubel",tags:["IT/Technology","Legal"]},
+  {name:"Nimis Group",location:"Loveland, OH",contact:"Marc Sennett",tags:["AIDC","Mobility","Retail POS"]},
+  {name:"nitruc",location:"New Jersey",contact:"",tags:["AI Recruiting","Data Analytics","Data Science"]},
+  {name:"North Star Professional Services",location:"",contact:"",tags:["Professional Services"]},
+  {name:"NorthWest Recruiting Partners",location:"",contact:"",tags:["Recruiting"]},
+  {name:"OpusLex Partners",location:"",contact:"",tags:["Legal"]},
+  {name:"ParkerBeth",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Peak Recruiter",location:"Aurora, CO",contact:"Michael Duggan",tags:["Healthcare","Executive Recruitment"]},
+  {name:"Pena Search",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Petrus Talent Consulting",location:"",contact:"",tags:["Talent Consulting"]},
+  {name:"Pinnacle Search International",location:"Houston, TX / Calgary, AB",contact:"",tags:["Executive Leadership","Technology","Sales & Marketing","HR Leaders","Engineering","Accounting","Architecture","Construction","Manufacturing"]},
+  {name:"Pioneer Search Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"PMJOBS.US",location:"",contact:"",tags:["Project Management"]},
+  {name:"PMO Partners",location:"Groton, MA",contact:"Brian Abrams",tags:["IT Project Management","PMO Recruiting","Business Analysis"]},
+  {name:"PRA USA",location:"",contact:"",tags:["Staffing"]},
+  {name:"Premier-Staffing",location:"",contact:"",tags:["Staffing"]},
+  {name:"ProXcess Recruiting",location:"",contact:"",tags:["Recruiting"]},
+  {name:"Rayboy Insider Search",location:"Plano, TX",contact:"Jordan Rayboy",tags:["Cybersecurity","Data Storage","Data Center Infrastructure"]},
+  {name:"Red Kite Recruiting",location:"",contact:"",tags:["Recruiting"]},
+  {name:"Reneris",location:"",contact:"",tags:["Executive Search","Talent Management Consulting"]},
+  {name:"Reveal Talent",location:"",contact:"",tags:["Talent"]},
+  {name:"Rhonemus Group",location:"",contact:"Brian Rhonemus",tags:["Executive Search"]},
+  {name:"Ringside Search Partners",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Rochester",location:"Rochester, NY",contact:"",tags:["General"]},
+  {name:"ROI Executive Search",location:"",contact:"",tags:["Executive Search"]},
+  {name:"RPM ReSearch",location:"",contact:"",tags:["Executive Search"]},
+  {name:"RSMC Services",location:"",contact:"",tags:["Services"]},
+  {name:"Russ Hadick & Associates",location:"Centerville, OH",contact:"Russ Hadick",tags:["Technical Recruiting","Engineering","IT","Construction","Accounting & Finance"]},
+  {name:"SANINC",location:"Pewee Valley, KY",contact:"",tags:["Metals","Plastics"]},
+  {name:"Schmidt Group",location:"New Hampshire",contact:"Bonnie Shutak",tags:["Medical Device","Spine","Orthopedic","Pain Management","Sports Medicine","General Surgery","Cardiovascular"]},
+  {name:"Shapiro Legal Search",location:"",contact:"David Shapiro",tags:["Legal"]},
+  {name:"Shavulsky Search",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Simply Driven Executive Search",location:"Indiana",contact:"",tags:["Artificial Intelligence","Automation","Robotics","Engineering","Finance","Accounting","Legal","Human Resources","Information Technology","Retail POS Technology"]},
+  {name:"Sirch Incorporated",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Source Care Solutions",location:"",contact:"",tags:["Healthcare"]},
+  {name:"Spinnaker Search Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"SPI of Chicago",location:"Chicago, IL",contact:"",tags:["Executive Search"]},
+  {name:"Square Set Metals Recruiting",location:"",contact:"",tags:["Metals","Mining"]},
+  {name:"Stephenson Advisory Group",location:"Nashville, TN",contact:"Sean Stephenson",tags:["Executive Search"]},
+  {name:"Sterling Brooks Search Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"StraussGroup",location:"Williamsville, NY",contact:"Randy Strauss",tags:["Executive Search","Contract Staffing","RPO"]},
+  {name:"Synergy Search Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"TalentSphere Staffing Solutions",location:"Toronto, ON (multi-city)",contact:"",tags:["Architecture","Design","Finance & Accounting","Technical & Engineering","Sales","Marketing","Construction","Real Estate","Pharmaceuticals","Data Analytics"]},
+  {name:"Tallmadge & Hill",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Tamarack Recruiting",location:"",contact:"",tags:["Recruiting"]},
+  {name:"Targeted Recruiting Group",location:"",contact:"",tags:["Recruiting"]},
+  {name:"The Anderson Search Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Birmingham Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Energy People Group",location:"Midland, TX",contact:"Melissa Hooper",tags:["Oil & Gas","Water","Utilities","Renewables","Nuclear","Energy"]},
+  {name:"The Hire Mark",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Lion Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Luksan Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Remedy Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Swan Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Ursitti Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"The Zike Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Titan Staffing Solutions",location:"",contact:"",tags:["Staffing"]},
+  {name:"Top Candidate Search Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Top Notch Finders",location:"San Diego, CA",contact:"Fernando Espinosa Ramirez",tags:["Manufacturing","Automotive","Aerospace","Medical Device","Electronics","C-Suite","Plant Management","Mexico","Latin America"]},
+  {name:"TRX Executive Search",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Unified Talent Group",location:"",contact:"",tags:["Talent"]},
+  {name:"Velocity Search Group",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Venture Talent Solutions",location:"",contact:"",tags:["Talent"]},
+  {name:"Vero Beach",location:"Vero Beach, FL",contact:"",tags:["General"]},
+  {name:"Visionary Executive Search",location:"",contact:"",tags:["Executive Search"]},
+  {name:"Wayne",location:"Wayne, NJ",contact:"",tags:["General"]},
+  {name:"WilliamCharles Search Group",location:"Ada, MI / Pittsburgh, PA",contact:"",tags:["Manufacturing","Distribution","Healthcare","Banking","Nonprofit","C-Suite","Finance & Accounting","Human Resources","Operations","Supply Chain","Engineering","Sales & Marketing"]},
+  {name:"Windward Recruiting",location:"",contact:"",tags:["Recruiting"]},
+  {name:"Windward Talent Group",location:"Cleveland, OH",contact:"M. Dobransky",tags:["Electrical Power","Renewable Energy","Energy Storage","CleanTech","EV","Microgrid"]}
+];
+
+// Kris's priority verticals for highlighting
+const PRIORITY_KEYWORDS = ['cybersecurity','cyber security','iot','internet of things','fintech','financial technology','embedded','connectivity','edge','ai','artificial intelligence','saas','software','blockchain','web3','data','robotics','automation','technology'];
+
+// Category filters
+const CATEGORIES = [
+  {label:"All", filter: null},
+  {label:"Tech & Cyber", filter: o => o.tags.some(t => /technology|information technology|it|cyber|software|ai|artificial intelligence|saas|blockchain|web3|data|robotics|automation|pega|sap|enterprise/i.test(t))},
+  {label:"Healthcare & Life Science", filter: o => o.tags.some(t => /health|medical|life science|biotech|diagnostic|physician|clinical|anesthes|cardio|neuro|vascular|nursing|hospice/i.test(t))},
+  {label:"Finance & Banking", filter: o => o.tags.some(t => /financ|banking|accounting|cpa|wealth|investment|hedge|private equity|venture capital|family office|tax|actuarial|portfolio/i.test(t))},
+  {label:"Engineering & Manufacturing", filter: o => o.tags.some(t => /engineer|manufactur|industrial|supply chain|operations|automation|aerospace|cnc|welding|fabricat/i.test(t))},
+  {label:"Construction & Building", filter: o => o.tags.some(t => /construct|building|architecture|hvac|plumbing|roofing|landscape|home improvement/i.test(t))},
+  {label:"Energy & Utilities", filter: o => o.tags.some(t => /energy|oil|gas|power|renewable|cleantech|ev|microgrid|nuclear|utilities|electrical power/i.test(t))},
+  {label:"Legal", filter: o => o.tags.some(t => /legal|attorney|law/i.test(t))},
+  {label:"Sales & Marketing", filter: o => o.tags.some(t => /sales|marketing|digital marketing|investor relation|communications/i.test(t))},
+  {label:"Food & Agriculture", filter: o => o.tags.some(t => /food|beverage|agri|grain|animal|catering|restaurant/i.test(t))}
+];
+
+let activeFilter = null;
+
+function isPriority(tag) {
+  const t = tag.toLowerCase();
+  return PRIORITY_KEYWORDS.some(k => t.includes(k));
+}
+
+function matchesSearch(office, query) {
+  if (!query) return true;
+  const terms = query.toLowerCase().split(/\s+/);
+  const haystack = [office.name, office.location, office.contact, ...office.tags].join(' ').toLowerCase();
+  return terms.every(term => haystack.includes(term));
+}
+
+function render() {
+  const query = document.getElementById('searchInput').value.trim();
+  let filtered = OFFICES.filter(o => matchesSearch(o, query));
+  if (activeFilter) {
+    const cat = CATEGORIES.find(c => c.label === activeFilter);
+    if (cat && cat.filter) filtered = filtered.filter(cat.filter);
+  }
+
+  // Sort: offices with more detail first, then alphabetical
+  filtered.sort((a, b) => {
+    const aDetail = (a.location ? 1 : 0) + (a.contact ? 1 : 0) + (a.tags.length > 1 ? 1 : 0);
+    const bDetail = (b.location ? 1 : 0) + (b.contact ? 1 : 0) + (b.tags.length > 1 ? 1 : 0);
+    if (bDetail !== aDetail) return bDetail - aDetail;
+    return a.name.localeCompare(b.name);
+  });
+
+  document.getElementById('resultsInfo').innerHTML =
+    `Showing <span>${filtered.length}</span> of ${OFFICES.length} offices` +
+    (query ? ` matching "${query}"` : '') +
+    (activeFilter && activeFilter !== 'All' ? ` in ${activeFilter}` : '');
+
+  const grid = document.getElementById('grid');
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="no-results"><strong>No offices match that search</strong>Try a broader term, or check the category filters above.</div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(o => {
+    const tagsHtml = o.tags.map(t =>
+      `<span class="tag${isPriority(t) ? ' highlight' : ''}">${t}</span>`
+    ).join('');
+    return `<div class="card">
+      <div class="card-top">
+        <div class="card-name">${o.name}</div>
+        ${o.location ? `<div class="card-location">${o.location}</div>` : ''}
+      </div>
+      ${o.contact ? `<div class="card-contact">${o.contact}</div>` : ''}
+      <div class="card-tags">${tagsHtml}</div>
+    </div>`;
+  }).join('');
+}
+
+function buildFilters() {
+  const container = document.getElementById('filters');
+  container.innerHTML = CATEGORIES.map(c =>
+    `<button class="filter-btn${c.label === 'All' ? ' active' : ''}" data-filter="${c.label}">${c.label}</button>`
+  ).join('');
+
+  container.addEventListener('click', e => {
+    const btn = e.target.closest('.filter-btn');
+    if (!btn) return;
+    container.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeFilter = btn.dataset.filter === 'All' ? null : btn.dataset.filter;
+    render();
+  });
+}
+
+document.getElementById('searchInput').addEventListener('input', render);
+buildFilters();
+render();
+</script>
