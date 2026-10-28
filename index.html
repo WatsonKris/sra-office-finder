@@ -11,6 +11,9 @@
   --bg-tag-highlight: #FFF3E0;
   --bg-filter: #EDF0F4;
   --bg-filter-active: #0F1A2E;
+  --bg-suggest: #FFFFFF;
+  --bg-suggest-hover: #F0F2F5;
+  --bg-dym: #FFF8F0;
   --text: #1A2332;
   --text-secondary: #5A6577;
   --text-tag: #3D4A5C;
@@ -23,9 +26,15 @@
   --border-card: #E2E6EC;
   --shadow-card: 0 1px 3px rgba(15,26,46,0.06);
   --shadow-search: 0 2px 12px rgba(15,26,46,0.08);
+  --shadow-suggest: 0 4px 20px rgba(15,26,46,0.12);
   --radius: 8px;
   --radius-sm: 5px;
   --radius-tag: 4px;
+  --match-bg: rgba(212,136,58,0.15);
+  --match-text: #B8651A;
+  --score-high: #2E7D6F;
+  --score-med: #D4883A;
+  --score-low: #8B95A5;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -38,6 +47,9 @@
     --bg-tag-highlight: #3D2A10;
     --bg-filter: #1C2A42;
     --bg-filter-active: #D4883A;
+    --bg-suggest: #152033;
+    --bg-suggest-hover: #1C2A42;
+    --bg-dym: #2A1F10;
     --text: #E2E6EC;
     --text-secondary: #8B95A5;
     --text-tag: #A0AAB8;
@@ -50,6 +62,12 @@
     --border-card: #253048;
     --shadow-card: 0 1px 3px rgba(0,0,0,0.2);
     --shadow-search: 0 2px 12px rgba(0,0,0,0.3);
+    --shadow-suggest: 0 4px 20px rgba(0,0,0,0.4);
+    --match-bg: rgba(232,163,90,0.2);
+    --match-text: #E8A35A;
+    --score-high: #4DBBAA;
+    --score-med: #E8A35A;
+    --score-low: #5A6577;
   }
 }
 
@@ -62,6 +80,9 @@
   --bg-tag-highlight: #3D2A10;
   --bg-filter: #1C2A42;
   --bg-filter-active: #D4883A;
+  --bg-suggest: #152033;
+  --bg-suggest-hover: #1C2A42;
+  --bg-dym: #2A1F10;
   --text: #E2E6EC;
   --text-secondary: #8B95A5;
   --text-tag: #A0AAB8;
@@ -74,6 +95,12 @@
   --border-card: #253048;
   --shadow-card: 0 1px 3px rgba(0,0,0,0.2);
   --shadow-search: 0 2px 12px rgba(0,0,0,0.3);
+  --shadow-suggest: 0 4px 20px rgba(0,0,0,0.4);
+  --match-bg: rgba(232,163,90,0.2);
+  --match-text: #E8A35A;
+  --score-high: #4DBBAA;
+  --score-med: #E8A35A;
+  --score-low: #5A6577;
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -129,11 +156,12 @@ body {
   width: 18px;
   height: 18px;
   color: var(--text-secondary);
+  pointer-events: none;
 }
 
 .search-input {
   width: 100%;
-  padding: 12px 14px 12px 42px;
+  padding: 12px 44px 12px 42px;
   font-family: inherit;
   font-size: 15px;
   border: 1px solid var(--border);
@@ -151,6 +179,152 @@ body {
 
 .search-input::placeholder {
   color: var(--text-secondary);
+}
+
+.clear-btn {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: var(--bg-tag);
+  color: var(--text-secondary);
+  border-radius: 50%;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+}
+
+.clear-btn.visible { display: flex; }
+
+/* Suggestions dropdown */
+.suggestions {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--bg-suggest);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-suggest);
+  max-height: 320px;
+  overflow-y: auto;
+  display: none;
+  z-index: 100;
+}
+
+.suggestions.open { display: block; }
+
+.suggestion-label {
+  padding: 8px 14px 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+.suggestion-item {
+  padding: 8px 14px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.1s;
+}
+
+.suggestion-item:hover, .suggestion-item.active {
+  background: var(--bg-suggest-hover);
+}
+
+.suggestion-item .s-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.suggestion-item .s-icon.industry { background: var(--accent-soft); color: var(--accent); }
+.suggestion-item .s-icon.location { background: var(--teal-soft); color: var(--teal); }
+.suggestion-item .s-icon.office { background: var(--bg-tag); color: var(--text-secondary); }
+
+.suggestion-item .s-text { flex: 1; min-width: 0; }
+.suggestion-item .s-main { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.suggestion-item .s-sub { display: block; font-size: 12px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.suggestion-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* Did you mean */
+.dym-bar {
+  background: var(--bg-dym);
+  border: 1px solid var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.dym-bar.visible { display: flex; }
+
+.dym-bar strong { color: var(--text); font-weight: 600; }
+
+.dym-link {
+  color: var(--accent);
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.dym-link:hover { opacity: 0.8; }
+
+/* Example queries */
+.examples {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+.example-chip {
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.example-chip:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  border-style: solid;
+  background: var(--accent-soft);
 }
 
 .filters {
@@ -194,12 +368,38 @@ body {
   font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .results-info span {
   color: var(--accent);
   font-weight: 700;
 }
+
+.results-info .parsed-query {
+  font-size: 12px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.parsed-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.parsed-pill.industry { background: var(--accent-soft); color: var(--accent); }
+.parsed-pill.location { background: var(--teal-soft); color: var(--teal); }
+.parsed-pill.role { background: var(--bg-tag); color: var(--text-tag); }
 
 .grid {
   max-width: 1200px;
@@ -218,6 +418,7 @@ body {
   box-shadow: var(--shadow-card);
   transition: background 0.15s, box-shadow 0.15s;
   cursor: default;
+  position: relative;
 }
 
 .card:hover {
@@ -276,6 +477,27 @@ body {
   font-weight: 600;
 }
 
+.tag.matched {
+  background: var(--match-bg);
+  color: var(--match-text);
+  font-weight: 600;
+}
+
+.match-score {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 10px;
+  letter-spacing: 0.3px;
+}
+
+.match-score.high { background: rgba(46,125,111,0.12); color: var(--score-high); }
+.match-score.med { background: var(--accent-soft); color: var(--score-med); }
+.match-score.low { background: var(--bg-tag); color: var(--score-low); }
+
 .no-results {
   grid-column: 1 / -1;
   text-align: center;
@@ -291,22 +513,12 @@ body {
   margin-bottom: 6px;
 }
 
-.kris-verticals {
+.no-results .try-links {
+  margin-top: 12px;
   display: flex;
-  gap: 6px;
+  gap: 8px;
+  justify-content: center;
   flex-wrap: wrap;
-  margin-top: 4px;
-  margin-bottom: 0;
-}
-
-.kris-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--text-secondary);
-  font-weight: 600;
-  margin-right: 4px;
-  align-self: center;
 }
 
 @media (max-width: 720px) {
@@ -316,19 +528,24 @@ body {
   .header h1 {
     font-size: 22px;
   }
+  .examples { display: none; }
 }
 </style>
 
 <div class="header">
   <h1>SRA Office Finder</h1>
-  <p class="subtitle">160 offices across the Sanford Rose Associates network, categorized by specialty. Search by industry, role type, or keyword.</p>
+  <p class="subtitle">160 offices across the Sanford Rose Associates network. Search naturally — try "biotech sales East Coast" or "who does fintech?"</p>
 </div>
 
 <div class="search-area">
   <div class="search-wrap">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/></svg>
-    <input class="search-input" type="text" id="searchInput" placeholder="Try: FinTech, cybersecurity, medical device, construction, AI...">
+    <input class="search-input" type="text" id="searchInput" placeholder="Search naturally: &quot;construction GCs&quot;, &quot;biotech sales East Coast&quot;, &quot;who focuses on fintech?&quot;">
+    <button class="clear-btn" id="clearBtn" title="Clear search">&times;</button>
+    <div class="suggestions" id="suggestions"></div>
   </div>
+  <div class="dym-bar" id="dymBar"></div>
+  <div class="examples" id="examples"></div>
   <div class="filters" id="filters"></div>
 </div>
 
@@ -336,6 +553,9 @@ body {
 <div class="grid" id="grid"></div>
 
 <script>
+// ============================================================
+// DATA — 160 offices (Source Care Solutions fixed)
+// ============================================================
 const OFFICES = [
   {name:"11th Hour Service",location:"Falls Church, VA",contact:"Alin Popescu",tags:["Communications","Consumer Services","DoD","Energy","Federal Sector","Healthcare","Manufacturing","Technology"]},
   {name:"3D CRO",location:"Fair Lawn, NJ",contact:"Paul Pellegrino",tags:["Life Science"]},
@@ -462,7 +682,7 @@ const OFFICES = [
   {name:"Shavulsky Search",location:"",contact:"",tags:["Executive Search"]},
   {name:"Simply Driven Executive Search",location:"Indiana",contact:"",tags:["Artificial Intelligence","Automation","Robotics","Engineering","Finance","Accounting","Legal","Human Resources","Information Technology","Retail POS Technology"]},
   {name:"Sirch Incorporated",location:"",contact:"",tags:["Executive Search"]},
-  {name:"Source Care Solutions",location:"",contact:"",tags:["Healthcare"]},
+  {name:"Source Care Solutions Inc.",location:"Flower Mound, TX",contact:"Kris Watson",tags:["Emerging Technology"]},
   {name:"Spinnaker Search Group",location:"",contact:"",tags:["Executive Search"]},
   {name:"SPI of Chicago",location:"Chicago, IL",contact:"",tags:["Executive Search"]},
   {name:"Square Set Metals Recruiting",location:"",contact:"",tags:["Metals","Mining"]},
@@ -499,14 +719,401 @@ const OFFICES = [
   {name:"Windward Talent Group",location:"Cleveland, OH",contact:"M. Dobransky",tags:["Electrical Power","Renewable Energy","Energy Storage","CleanTech","EV","Microgrid"]}
 ];
 
-// Kris's priority verticals for highlighting
-const PRIORITY_KEYWORDS = ['cybersecurity','cyber security','iot','internet of things','fintech','financial technology','embedded','connectivity','edge','ai','artificial intelligence','saas','software','blockchain','web3','data','robotics','automation','technology'];
+// ============================================================
+// SYNONYM / KEYWORD EXPANSION ENGINE
+// ============================================================
+const SYNONYMS = {
+  // Tech
+  'fintech': ['financial technology','financial services','banking','finance','trading strategy','investment management'],
+  'biotech': ['biotechnology','life science','diagnostics','pharmaceuticals'],
+  'cybersecurity': ['cyber security','cybersecurity','data storage','data center infrastructure','information security'],
+  'cyber': ['cyber security','cybersecurity','data center infrastructure'],
+  'ai': ['artificial intelligence','ai recruiting','data science','data analytics','machine learning','saas','technology'],
+  'ml': ['artificial intelligence','machine learning','data science','data analytics'],
+  'saas': ['saas','software','technology','software development'],
+  'software': ['software development','saas','information technology','technology'],
+  'it': ['information technology','it/technology','it project management','technology','software development','enterprise applications'],
+  'tech': ['technology','information technology','it/technology','emerging technology','software','saas','artificial intelligence'],
+  'iot': ['internet of things','connectivity','embedded','technology','electronics'],
+  'blockchain': ['blockchain','web3','cryptocurrency','fintech'],
+  'data': ['data analytics','data science','data storage','data center infrastructure','ai recruiting'],
+  'cloud': ['information technology','technology','saas','enterprise applications'],
+  'devops': ['information technology','technology','software development'],
+  'robotics': ['robotics','automation','robotic process automation','manufacturing technology'],
+  'automation': ['automation','robotic process automation','industrial automation','robotics','manufacturing technology'],
 
-// Category filters
+  // Healthcare
+  'healthcare': ['healthcare','health','medical','medical device','life science','clinical','hospitals','healthcare specialists','healthcare finance','healthcare support'],
+  'medical': ['medical','medical device','medical technologies','medical technology','healthcare','clinical','physicians'],
+  'pharma': ['pharmaceuticals','life science','biotechnology','diagnostics'],
+  'medtech': ['medical technology','medical technologies','medical device'],
+  'meddevice': ['medical device','medical technologies','medical technology'],
+  'nursing': ['skilled nursing','long term care','senior living','healthcare'],
+
+  // Construction
+  'gc': ['construction','general contractor','project management','superintendents','estimators'],
+  'gcs': ['construction','general contractor','project management','superintendents','estimators'],
+  'general contractor': ['construction','project management','superintendents','estimators'],
+  'general contractors': ['construction','project management','superintendents','estimators'],
+  'hvac': ['hvac/r','plumbing','building materials','construction'],
+  'mep': ['hvac/r','plumbing','engineering','construction','architecture'],
+  'roofing': ['roofing','building products','construction','home improvement'],
+
+  // Energy
+  'renewable': ['renewable energy','renewables','cleantech','ev','energy','energy storage','microgrid'],
+  'renewables': ['renewable energy','renewables','cleantech','ev','energy storage'],
+  'solar': ['renewable energy','renewables','cleantech','energy'],
+  'oil': ['oil & gas','oil field services','energy','power'],
+  'gas': ['oil & gas','oil field services','energy'],
+  'utilities': ['utilities','energy','power','water'],
+  'nuclear': ['nuclear','energy','power'],
+  'cleantech': ['cleantech','renewable energy','ev','energy storage','microgrid'],
+  'ev': ['ev','cleantech','renewable energy','energy storage','automotive'],
+
+  // Finance
+  'finance': ['finance','financial','financial services','accounting','accounting & finance','finance & accounting'],
+  'accounting': ['accounting','accounting & finance','cpa firms','finance & accounting','finance','tax'],
+  'banking': ['banking','commercial banking','mortgage banking','retail banking','financial services'],
+  'wealth': ['wealth management','private wealth','family office','investment management','portfolio managers'],
+  'pe': ['private equity','venture capital','mergers & acquisitions','investment management'],
+  'private equity': ['private equity','venture capital','mergers & acquisitions','investment management','hedge funds'],
+  'vc': ['venture capital','private equity','investment management'],
+  'insurance': ['insurance','financial services','risk management'],
+
+  // Manufacturing / Industrial
+  'manufacturing': ['manufacturing','industrial','industrial manufacturing','manufacturing management','manufacturing technology','plant management'],
+  'supply chain': ['supply chain','logistics','transportation','operations','distribution'],
+  'logistics': ['logistics','supply chain','transportation','distribution'],
+  'aerospace': ['aerospace','space','dod','defense'],
+  'defense': ['defense','dod','federal sector','aerospace'],
+  'packaging': ['packaging','flexible packaging','packaging & printing','paper'],
+  'metals': ['metals','mining','welding','sheet metal fabrication','cnc machining','powder metallurgy'],
+  'plastics': ['plastics','chemicals','industrial manufacturing'],
+  'chemicals': ['chemicals','plastics','consumer packaged goods'],
+
+  // Legal
+  'legal': ['legal','attorney','law'],
+  'attorney': ['attorney','legal','law'],
+  'law': ['legal','attorney','law'],
+
+  // Sales & Marketing
+  'sales': ['sales','marketing','technical sales','sales & marketing','digital marketing'],
+  'marketing': ['marketing','digital marketing','sales & marketing','communications','investor relations'],
+
+  // HR
+  'hr': ['human resources','hr leaders','talent optimization','talent consulting','leadership'],
+  'human resources': ['human resources','hr leaders','talent optimization'],
+
+  // Food & Ag
+  'agriculture': ['agricultural','agronomy','grain & feed','animal sciences','food','food & beverage'],
+  'food': ['food','food & beverage','food processing','beverage','catering','restaurants','contract foodservice'],
+  'hospitality': ['hospitality','hotels','resorts','restaurants','casinos','entertainment venues','catering','country clubs'],
+
+  // Real Estate
+  'real estate': ['real estate','multifamily','property management','construction'],
+  'property management': ['property management','real estate','multifamily','hotels'],
+
+  // Other
+  'nonprofit': ['nonprofit','diversity','higher education'],
+  'cpg': ['consumer packaged goods','food & beverage','chemicals','plastics'],
+  'automotive': ['automotive','ev','manufacturing']
+};
+
+// ============================================================
+// LOCATION / REGION DATA
+// ============================================================
+const REGIONS = {
+  'east coast': ['VA','NJ','FL','NY','MA','NC','PA','GA','ME','DE','CT','MD','DC','NH','RI','VT','SC','WV','TN','AL','KY','OH','IN','MI'],
+  'eastern': ['VA','NJ','FL','NY','MA','NC','PA','GA','ME','DE','CT','MD','DC','NH','RI','VT','SC','WV','TN','AL','KY','OH','IN','MI'],
+  'west coast': ['CA','OR','WA','AZ','NV','HI','AK'],
+  'western': ['CA','OR','WA','AZ','NV','CO','UT','ID','MT','WY','NM'],
+  'midwest': ['OH','IN','IL','WI','MN','IA','MO','MI','KS','NE','ND','SD'],
+  'midwestern': ['OH','IN','IL','WI','MN','IA','MO','MI','KS','NE','ND','SD'],
+  'south': ['TX','FL','GA','NC','SC','TN','AL','LA','MS','AR','VA','KY','WV','OK','MD','DC'],
+  'southern': ['TX','FL','GA','NC','SC','TN','AL','LA','MS','AR','VA','KY','WV','OK','MD','DC'],
+  'southeast': ['FL','GA','NC','SC','TN','AL','VA','KY'],
+  'southwest': ['TX','AZ','NM','NV','CO','UT','OK'],
+  'northeast': ['NY','NJ','MA','CT','PA','ME','NH','RI','VT','MD','DC','DE'],
+  'northwest': ['OR','WA','ID','MT','WY'],
+  'pacific northwest': ['OR','WA'],
+  'texas': ['TX'],
+  'california': ['CA'],
+  'florida': ['FL'],
+  'new york': ['NY'],
+  'ohio': ['OH'],
+  'canada': ['ON','BC','AB']
+};
+
+const STATE_ABBRS = {
+  'alabama':'AL','alaska':'AK','arizona':'AZ','arkansas':'AR','california':'CA',
+  'colorado':'CO','connecticut':'CT','delaware':'DE','florida':'FL','georgia':'GA',
+  'hawaii':'HI','idaho':'ID','illinois':'IL','indiana':'IN','iowa':'IA',
+  'kansas':'KS','kentucky':'KY','louisiana':'LA','maine':'ME','maryland':'MD',
+  'massachusetts':'MA','michigan':'MI','minnesota':'MN','mississippi':'MS',
+  'missouri':'MO','montana':'MT','nebraska':'NE','nevada':'NV','new hampshire':'NH',
+  'new jersey':'NJ','new mexico':'NM','new york':'NY','north carolina':'NC',
+  'north dakota':'ND','ohio':'OH','oklahoma':'OK','oregon':'OR','pennsylvania':'PA',
+  'rhode island':'RI','south carolina':'SC','south dakota':'SD','tennessee':'TN',
+  'texas':'TX','utah':'UT','vermont':'VT','virginia':'VA','washington':'WA',
+  'west virginia':'WV','wisconsin':'WI','wyoming':'WY','ontario':'ON','british columbia':'BC','alberta':'AB'
+};
+
+// ============================================================
+// FUZZY MATCHING (Levenshtein distance)
+// ============================================================
+function levenshtein(a, b) {
+  if (a.length === 0) return b.length;
+  if (b.length === 0) return a.length;
+  const matrix = [];
+  for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      if (b[i-1] === a[j-1]) matrix[i][j] = matrix[i-1][j-1];
+      else matrix[i][j] = Math.min(matrix[i-1][j-1]+1, matrix[i][j-1]+1, matrix[i-1][j]+1);
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+function fuzzyMatch(needle, haystack, threshold) {
+  needle = needle.toLowerCase();
+  haystack = haystack.toLowerCase();
+  if (haystack.includes(needle)) return { match: true, distance: 0, exact: true };
+  // Check each word in haystack
+  const words = haystack.split(/[\s,\/&]+/);
+  let bestDist = Infinity;
+  for (const word of words) {
+    if (word.length < 2) continue;
+    const dist = levenshtein(needle, word);
+    const maxLen = Math.max(needle.length, word.length);
+    if (dist <= threshold && dist < bestDist) bestDist = dist;
+    // Also check if needle is a prefix
+    if (word.startsWith(needle) || needle.startsWith(word)) {
+      bestDist = Math.min(bestDist, 1);
+    }
+  }
+  return { match: bestDist <= threshold, distance: bestDist, exact: false };
+}
+
+// ============================================================
+// NATURAL LANGUAGE QUERY PARSER
+// ============================================================
+const NOISE_WORDS = new Set(['who','what','which','where','is','the','best','for','a','an','in','on','at','of',
+  'does','do','that','this','are','can','has','have','with','and','or','to','from',
+  'focuses','focus','specializes','specialize','specialist','specialists',
+  'recruiter','recruiters','recruiting','offices','office','firm','firms',
+  'search','find','looking','need','want','good','great','top']);
+
+function parseQuery(raw) {
+  // Strip question marks and common filler
+  let q = raw.toLowerCase().replace(/[?!.]/g, '').trim();
+
+  const parsed = { industries: [], locations: [], roles: [], rawTerms: [], original: raw };
+
+  // Extract region / location phrases first
+  for (const [region, states] of Object.entries(REGIONS)) {
+    const re = new RegExp('\\b' + region.replace(/\s+/g, '\\s+') + '\\b', 'i');
+    if (re.test(q)) {
+      parsed.locations.push({ name: region, states });
+      q = q.replace(re, ' ');
+    }
+  }
+
+  // Extract state names
+  for (const [state, abbr] of Object.entries(STATE_ABBRS)) {
+    const re = new RegExp('\\b' + state.replace(/\s+/g, '\\s+') + '\\b', 'i');
+    if (re.test(q)) {
+      parsed.locations.push({ name: state, states: [abbr] });
+      q = q.replace(re, ' ');
+    }
+  }
+
+  // Check for 2-letter state abbreviations
+  const abbrMatch = q.match(/\b([A-Z]{2})\b/i);
+  if (abbrMatch) {
+    const abbr = abbrMatch[1].toUpperCase();
+    const validAbbrs = new Set(Object.values(STATE_ABBRS));
+    if (validAbbrs.has(abbr)) {
+      parsed.locations.push({ name: abbr, states: [abbr] });
+      q = q.replace(new RegExp('\\b' + abbrMatch[1] + '\\b', 'i'), ' ');
+    }
+  }
+
+  // Extract known synonym keys (multi-word first)
+  const synKeys = Object.keys(SYNONYMS).sort((a, b) => b.length - a.length);
+  for (const key of synKeys) {
+    const re = new RegExp('\\b' + key.replace(/[+\/]/g, '\\$&').replace(/\s+/g, '\\s+') + '\\b', 'i');
+    if (re.test(q)) {
+      parsed.industries.push(key);
+      q = q.replace(re, ' ');
+    }
+  }
+
+  // Remaining meaningful words
+  const remaining = q.split(/\s+/).filter(w => w.length > 1 && !NOISE_WORDS.has(w));
+  parsed.rawTerms = remaining;
+
+  return parsed;
+}
+
+// ============================================================
+// SCORING ENGINE
+// ============================================================
+function scoreOffice(office, parsed) {
+  let score = 0;
+  const matchedTags = new Set();
+  const haystack = [office.name, office.location, office.contact, ...office.tags].join(' ').toLowerCase();
+
+  // Industry matching via synonyms
+  for (const industry of parsed.industries) {
+    const expansions = SYNONYMS[industry] || [industry];
+    for (const exp of expansions) {
+      for (const tag of office.tags) {
+        if (tag.toLowerCase().includes(exp.toLowerCase()) || exp.toLowerCase().includes(tag.toLowerCase())) {
+          score += 20;
+          matchedTags.add(tag);
+        }
+      }
+    }
+    // Also direct match in haystack
+    if (haystack.includes(industry)) {
+      score += 15;
+    }
+  }
+
+  // Location matching
+  for (const loc of parsed.locations) {
+    if (!office.location) continue;
+    const officeLoc = office.location.toUpperCase();
+    for (const st of loc.states) {
+      if (officeLoc.includes(st) || officeLoc.includes(', ' + st)) {
+        score += 25;
+        break;
+      }
+    }
+  }
+
+  // Raw term matching (fuzzy)
+  for (const term of parsed.rawTerms) {
+    // Exact substring
+    if (haystack.includes(term)) {
+      score += 10;
+      // Find which tag matched
+      for (const tag of office.tags) {
+        if (tag.toLowerCase().includes(term)) matchedTags.add(tag);
+      }
+    } else {
+      // Fuzzy match
+      const threshold = term.length <= 4 ? 1 : 2;
+      const result = fuzzyMatch(term, haystack, threshold);
+      if (result.match) {
+        score += Math.max(1, 6 - result.distance * 2);
+        for (const tag of office.tags) {
+          const tagResult = fuzzyMatch(term, tag, threshold);
+          if (tagResult.match) matchedTags.add(tag);
+        }
+      }
+    }
+  }
+
+  // Bonus for offices with more detail (location, contact, multiple tags)
+  if (office.location) score += 1;
+  if (office.contact) score += 1;
+  if (office.tags.length > 2) score += 1;
+
+  return { score, matchedTags: [...matchedTags] };
+}
+
+// ============================================================
+// "DID YOU MEAN?" SUGGESTIONS
+// ============================================================
+function getDidYouMean(rawTerms) {
+  const suggestions = [];
+  const allTags = new Set();
+  OFFICES.forEach(o => o.tags.forEach(t => allTags.add(t.toLowerCase())));
+  const tagList = [...allTags];
+
+  for (const term of rawTerms) {
+    if (term.length < 3) continue;
+    // Check if it's close to a known synonym key
+    for (const key of Object.keys(SYNONYMS)) {
+      const dist = levenshtein(term, key);
+      if (dist > 0 && dist <= 2 && dist < term.length * 0.4) {
+        suggestions.push({ from: term, to: key, distance: dist });
+      }
+    }
+    // Check if it's close to a tag
+    for (const tag of tagList) {
+      const dist = levenshtein(term, tag);
+      if (dist > 0 && dist <= 2 && dist < term.length * 0.35) {
+        suggestions.push({ from: term, to: tag, distance: dist });
+      }
+    }
+  }
+
+  // Deduplicate, keep best
+  const best = {};
+  for (const s of suggestions) {
+    if (!best[s.from] || s.distance < best[s.from].distance) {
+      best[s.from] = s;
+    }
+  }
+  return Object.values(best);
+}
+
+// ============================================================
+// AUTOCOMPLETE SUGGESTIONS
+// ============================================================
+function getSuggestions(partial) {
+  if (!partial || partial.length < 2) return [];
+  const p = partial.toLowerCase();
+  const results = [];
+
+  // Industry / synonym matches
+  for (const key of Object.keys(SYNONYMS)) {
+    if (key.includes(p) || p.includes(key)) {
+      results.push({ type: 'industry', text: key, sub: SYNONYMS[key].slice(0, 3).join(', ') });
+    }
+  }
+
+  // Tag matches
+  const allTags = new Set();
+  OFFICES.forEach(o => o.tags.forEach(t => allTags.add(t)));
+  for (const tag of allTags) {
+    if (tag.toLowerCase().includes(p) && !results.some(r => r.text.toLowerCase() === tag.toLowerCase())) {
+      const count = OFFICES.filter(o => o.tags.includes(tag)).length;
+      if (tag !== 'Executive Search' && tag !== 'Recruiting' && tag !== 'Staffing') {
+        results.push({ type: 'industry', text: tag, sub: `${count} office${count > 1 ? 's' : ''}` });
+      }
+    }
+  }
+
+  // Location matches
+  for (const region of Object.keys(REGIONS)) {
+    if (region.includes(p)) {
+      results.push({ type: 'location', text: region, sub: `${REGIONS[region].length} states` });
+    }
+  }
+
+  // Office name matches
+  for (const o of OFFICES) {
+    if (o.name.toLowerCase().includes(p)) {
+      results.push({ type: 'office', text: o.name, sub: o.location || '' });
+    }
+  }
+
+  // Limit
+  return results.slice(0, 8);
+}
+
+// ============================================================
+// CATEGORY FILTERS
+// ============================================================
 const CATEGORIES = [
   {label:"All", filter: null},
-  {label:"Tech & Cyber", filter: o => o.tags.some(t => /technology|information technology|it|cyber|software|ai|artificial intelligence|saas|blockchain|web3|data|robotics|automation|pega|sap|enterprise/i.test(t))},
-  {label:"Healthcare & Life Science", filter: o => o.tags.some(t => /health|medical|life science|biotech|diagnostic|physician|clinical|anesthes|cardio|neuro|vascular|nursing|hospice/i.test(t))},
+  {label:"Tech & Cyber", filter: o => o.tags.some(t => /technology|information technology|it|cyber|software|ai|artificial intelligence|saas|blockchain|web3|data|robotics|automation|pega|sap|enterprise|emerging/i.test(t))},
+  {label:"Healthcare & Life Science", filter: o => o.tags.some(t => /health|medical|life science|biotech|diagnostic|physician|clinical|anesthes|cardio|neuro|vascular|nursing|hospice|pharma/i.test(t))},
   {label:"Finance & Banking", filter: o => o.tags.some(t => /financ|banking|accounting|cpa|wealth|investment|hedge|private equity|venture capital|family office|tax|actuarial|portfolio/i.test(t))},
   {label:"Engineering & Manufacturing", filter: o => o.tags.some(t => /engineer|manufactur|industrial|supply chain|operations|automation|aerospace|cnc|welding|fabricat/i.test(t))},
   {label:"Construction & Building", filter: o => o.tags.some(t => /construct|building|architecture|hvac|plumbing|roofing|landscape|home improvement/i.test(t))},
@@ -516,52 +1123,147 @@ const CATEGORIES = [
   {label:"Food & Agriculture", filter: o => o.tags.some(t => /food|beverage|agri|grain|animal|catering|restaurant/i.test(t))}
 ];
 
-let activeFilter = null;
+// Priority keywords for Kris's verticals
+const PRIORITY_KEYWORDS = ['cybersecurity','cyber security','iot','internet of things','fintech','financial technology','embedded','connectivity','edge','ai','artificial intelligence','saas','software','blockchain','web3','data','robotics','automation','technology','emerging technology'];
 
+// Example queries
+const EXAMPLE_QUERIES = [
+  'who does fintech?',
+  'construction GCs',
+  'biotech sales East Coast',
+  'cybersecurity',
+  'medical device midwest',
+  'oil & gas Texas',
+  'AI and robotics',
+  'legal northeast'
+];
+
+// ============================================================
+// STATE
+// ============================================================
+let activeFilter = null;
+let suggestIndex = -1;
+
+// ============================================================
+// RENDER
+// ============================================================
 function isPriority(tag) {
   const t = tag.toLowerCase();
   return PRIORITY_KEYWORDS.some(k => t.includes(k));
 }
 
-function matchesSearch(office, query) {
-  if (!query) return true;
-  const terms = query.toLowerCase().split(/\s+/);
-  const haystack = [office.name, office.location, office.contact, ...office.tags].join(' ').toLowerCase();
-  return terms.every(term => haystack.includes(term));
-}
-
 function render() {
-  const query = document.getElementById('searchInput').value.trim();
-  let filtered = OFFICES.filter(o => matchesSearch(o, query));
-  if (activeFilter) {
-    const cat = CATEGORIES.find(c => c.label === activeFilter);
-    if (cat && cat.filter) filtered = filtered.filter(cat.filter);
+  const raw = document.getElementById('searchInput').value.trim();
+  const clearBtn = document.getElementById('clearBtn');
+  clearBtn.classList.toggle('visible', raw.length > 0);
+
+  // Close suggestions on render
+  document.getElementById('suggestions').classList.remove('open');
+
+  const parsed = parseQuery(raw);
+  const hasQuery = raw.length > 0;
+
+  let results;
+  if (!hasQuery) {
+    results = OFFICES.map(o => ({ office: o, score: 0, matchedTags: [] }));
+  } else {
+    results = OFFICES.map(o => {
+      const { score, matchedTags } = scoreOffice(o, parsed);
+      return { office: o, score, matchedTags };
+    }).filter(r => r.score > 0);
   }
 
-  // Sort: offices with more detail first, then alphabetical
-  filtered.sort((a, b) => {
-    const aDetail = (a.location ? 1 : 0) + (a.contact ? 1 : 0) + (a.tags.length > 1 ? 1 : 0);
-    const bDetail = (b.location ? 1 : 0) + (b.contact ? 1 : 0) + (b.tags.length > 1 ? 1 : 0);
+  // Apply category filter
+  if (activeFilter) {
+    const cat = CATEGORIES.find(c => c.label === activeFilter);
+    if (cat && cat.filter) results = results.filter(r => cat.filter(r.office));
+  }
+
+  // Sort by score (desc), then detail, then alpha
+  results.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    const aDetail = (a.office.location ? 1 : 0) + (a.office.contact ? 1 : 0) + (a.office.tags.length > 1 ? 1 : 0);
+    const bDetail = (b.office.location ? 1 : 0) + (b.office.contact ? 1 : 0) + (b.office.tags.length > 1 ? 1 : 0);
     if (bDetail !== aDetail) return bDetail - aDetail;
-    return a.name.localeCompare(b.name);
+    return a.office.name.localeCompare(b.office.name);
   });
 
-  document.getElementById('resultsInfo').innerHTML =
-    `Showing <span>${filtered.length}</span> of ${OFFICES.length} offices` +
-    (query ? ` matching "${query}"` : '') +
-    (activeFilter && activeFilter !== 'All' ? ` in ${activeFilter}` : '');
+  // Did you mean?
+  const dymBar = document.getElementById('dymBar');
+  if (hasQuery && results.length < 5 && parsed.rawTerms.length > 0) {
+    const dyms = getDidYouMean(parsed.rawTerms);
+    if (dyms.length > 0) {
+      dymBar.innerHTML = 'Did you mean: ' + dyms.map(d =>
+        `<span class="dym-link" onclick="applyDym('${d.to.replace(/'/g, "\\'")}')">${d.to}</span>`
+      ).join(', ') + '?';
+      dymBar.classList.add('visible');
+    } else {
+      dymBar.classList.remove('visible');
+    }
+  } else {
+    dymBar.classList.remove('visible');
+  }
 
+  // Parsed query pills
+  let parsedHtml = '';
+  if (hasQuery && (parsed.industries.length || parsed.locations.length)) {
+    const pills = [];
+    for (const ind of parsed.industries) pills.push(`<span class="parsed-pill industry">${ind}</span>`);
+    for (const loc of parsed.locations) pills.push(`<span class="parsed-pill location">${loc.name}</span>`);
+    parsedHtml = `<div class="parsed-query">${pills.join('')}</div>`;
+  }
+
+  // Results info
+  const maxScore = results.length > 0 ? results[0].score : 0;
+  document.getElementById('resultsInfo').innerHTML =
+    `<div>Showing <span>${results.length}</span> of ${OFFICES.length} offices` +
+    (hasQuery ? ` matching "${raw}"` : '') +
+    (activeFilter && activeFilter !== 'All' ? ` in ${activeFilter}` : '') +
+    `</div>${parsedHtml}`;
+
+  // Examples (show when no query)
+  const examplesEl = document.getElementById('examples');
+  if (!hasQuery) {
+    examplesEl.innerHTML = '<span style="font-size:11px;color:var(--text-secondary);font-weight:500;margin-right:4px;">Try:</span>' +
+      EXAMPLE_QUERIES.map(q => `<button class="example-chip" onclick="tryExample('${q.replace(/'/g, "\\'")}')">${q}</button>`).join('');
+    examplesEl.style.display = '';
+  } else {
+    examplesEl.style.display = 'none';
+  }
+
+  // Grid
   const grid = document.getElementById('grid');
-  if (filtered.length === 0) {
-    grid.innerHTML = `<div class="no-results"><strong>No offices match that search</strong>Try a broader term, or check the category filters above.</div>`;
+  if (results.length === 0) {
+    const suggestions = EXAMPLE_QUERIES.slice(0, 4).map(q =>
+      `<button class="example-chip" onclick="tryExample('${q.replace(/'/g, "\\'")}')">${q}</button>`
+    ).join('');
+    grid.innerHTML = `<div class="no-results">
+      <strong>No offices match "${raw}"</strong>
+      Try a different term, or use natural language like the examples below.
+      <div class="try-links">${suggestions}</div>
+    </div>`;
     return;
   }
 
-  grid.innerHTML = filtered.map(o => {
-    const tagsHtml = o.tags.map(t =>
-      `<span class="tag${isPriority(t) ? ' highlight' : ''}">${t}</span>`
-    ).join('');
+  grid.innerHTML = results.map(r => {
+    const o = r.office;
+    const tagsHtml = o.tags.map(t => {
+      let cls = 'tag';
+      if (r.matchedTags.includes(t)) cls += ' matched';
+      else if (isPriority(t)) cls += ' highlight';
+      return `<span class="${cls}">${t}</span>`;
+    }).join('');
+
+    // Match score badge
+    let scoreBadge = '';
+    if (hasQuery && r.score > 0) {
+      const pct = maxScore > 0 ? Math.round((r.score / maxScore) * 100) : 0;
+      const level = pct >= 70 ? 'high' : pct >= 40 ? 'med' : 'low';
+      scoreBadge = `<span class="match-score ${level}">${pct}%</span>`;
+    }
+
     return `<div class="card">
+      ${scoreBadge}
       <div class="card-top">
         <div class="card-name">${o.name}</div>
         ${o.location ? `<div class="card-location">${o.location}</div>` : ''}
@@ -572,6 +1274,67 @@ function render() {
   }).join('');
 }
 
+// ============================================================
+// AUTOCOMPLETE UI
+// ============================================================
+function showSuggestions() {
+  const input = document.getElementById('searchInput');
+  const val = input.value.trim();
+  const suggestions = getSuggestions(val);
+  const el = document.getElementById('suggestions');
+
+  if (suggestions.length === 0) {
+    el.classList.remove('open');
+    return;
+  }
+
+  const icons = { industry: '🏢', location: '📍', office: '🔍' };
+  let html = '';
+  let lastType = '';
+  suggestions.forEach((s, i) => {
+    if (s.type !== lastType) {
+      const labels = { industry: 'Industries & Specialties', location: 'Regions', office: 'Offices' };
+      if (lastType) html += '<div class="suggestion-divider"></div>';
+      html += `<div class="suggestion-label">${labels[s.type] || s.type}</div>`;
+      lastType = s.type;
+    }
+    html += `<div class="suggestion-item" data-idx="${i}" data-text="${s.text.replace(/"/g, '&quot;')}" onclick="pickSuggestion(this)">
+      <div class="s-icon ${s.type}">${icons[s.type]}</div>
+      <div class="s-text">
+        <span class="s-main">${s.text}</span>
+        ${s.sub ? `<span class="s-sub">${s.sub}</span>` : ''}
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+  el.classList.add('open');
+  suggestIndex = -1;
+}
+
+function pickSuggestion(el) {
+  const text = el.dataset.text;
+  document.getElementById('searchInput').value = text;
+  document.getElementById('suggestions').classList.remove('open');
+  render();
+}
+
+function tryExample(q) {
+  document.getElementById('searchInput').value = q;
+  render();
+  document.getElementById('searchInput').focus();
+}
+
+function applyDym(term) {
+  const input = document.getElementById('searchInput');
+  input.value = term;
+  render();
+  input.focus();
+}
+
+// ============================================================
+// FILTERS
+// ============================================================
 function buildFilters() {
   const container = document.getElementById('filters');
   container.innerHTML = CATEGORIES.map(c =>
@@ -588,7 +1351,69 @@ function buildFilters() {
   });
 }
 
-document.getElementById('searchInput').addEventListener('input', render);
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+const searchInput = document.getElementById('searchInput');
+let debounceTimer;
+
+searchInput.addEventListener('input', () => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    render();
+    showSuggestions();
+  }, 150);
+});
+
+searchInput.addEventListener('focus', () => {
+  if (searchInput.value.trim().length >= 2) showSuggestions();
+});
+
+searchInput.addEventListener('keydown', e => {
+  const sugEl = document.getElementById('suggestions');
+  const items = sugEl.querySelectorAll('.suggestion-item');
+  if (!sugEl.classList.contains('open') || items.length === 0) {
+    if (e.key === 'Enter') { e.preventDefault(); render(); }
+    return;
+  }
+
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    suggestIndex = Math.min(suggestIndex + 1, items.length - 1);
+    items.forEach((it, i) => it.classList.toggle('active', i === suggestIndex));
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    suggestIndex = Math.max(suggestIndex - 1, -1);
+    items.forEach((it, i) => it.classList.toggle('active', i === suggestIndex));
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (suggestIndex >= 0 && items[suggestIndex]) {
+      pickSuggestion(items[suggestIndex]);
+    } else {
+      sugEl.classList.remove('open');
+      render();
+    }
+  } else if (e.key === 'Escape') {
+    sugEl.classList.remove('open');
+  }
+});
+
+document.getElementById('clearBtn').addEventListener('click', () => {
+  searchInput.value = '';
+  render();
+  searchInput.focus();
+});
+
+// Close suggestions on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) {
+    document.getElementById('suggestions').classList.remove('open');
+  }
+});
+
+// ============================================================
+// INIT
+// ============================================================
 buildFilters();
 render();
 </script>
